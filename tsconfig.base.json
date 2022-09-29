@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@todo-app/data-access": ["packages/data-access/src/index.ts"],
       "@todo-app/shared-types": ["packages/shared-types/src/index.ts"]
     }
   },
