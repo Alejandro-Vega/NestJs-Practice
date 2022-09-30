@@ -1,53 +1,53 @@
 import axios from 'axios';
 import { useCallback, useEffect, useState } from 'react';
-import { ITodo } from '@todo-app/shared-types';
+import { EnumTodoStatus, ICreateTodoDto, ITodo, IUpdateTodoDto } from '@todo-app/shared-types';
 
 export function useTodos() {
   const [todos, setTodos] = useState<Array<ITodo>>();
 
-  const getTodos = useCallback(async () => {
-    const res = await axios.get<Array<ITodo>>('http://localhost:3333/api');
+  const getAllTodos = useCallback(async () => {
+    const res = await axios.get<Array<ITodo>>('http://localhost:3333/api/todo/GetAllTodos');
     if (!res?.data?.length) {
       return;
     }
     setTodos(res.data);
   }, []);
 
-  const addTodo = useCallback(
-    async (text: string) => {
-      if (!text) {
+  const createTodo = useCallback(
+    async (todo: ICreateTodoDto) => {
+      if (!todo) {
         return;
       }
-      await axios.post('http://localhost:3333/api', {
-        text,
-      });
-      getTodos();
+      await axios.post('http://localhost:3333/api/todo/CreateTodo', todo);
+      getAllTodos();
     },
-    [getTodos]
+    [getAllTodos]
   );
 
-  const toggleTodo = useCallback(
-    async (id: number) => {
-      const res = await axios.post('http://localhost:3333/api/setDone', {
-        id,
-        done: !todos?.find((todo) => todo.id === id)?.done,
-      });
-      if (!res?.data?.length) {
-        return;
-      }
-      setTodos(res.data);
-    },
-    [todos]
-  );
+  const updateTodo = useCallback(async (id: number, dto: IUpdateTodoDto) => {
+    const res = await axios.post('http://localhost:3333/api/todo/UpdateTodo', dto);
+    if (!res?.data?.length) {
+      return;
+    }
+    setTodos(res.data);
+  }, []);
+
+  const updateTodoStatus = useCallback(async (id: number, status: EnumTodoStatus) => {
+    const res = await axios.post('http://localhost:3333/api/todo/UpdateTodo', { id, status });
+    if (!res?.data) {
+      return;
+    }
+    setTodos((todos) => todos?.map((todo) => (todo.id === res.data.id ? res.data : todo)));
+  }, []);
 
   useEffect(() => {
-    getTodos();
-  }, [getTodos]);
+    getAllTodos();
+  }, [getAllTodos]);
 
   return {
     todos,
-    getTodos,
-    addTodo,
-    toggleTodo,
+    getAllTodos,
+    createTodo,
+    updateTodoStatus
   };
 }
