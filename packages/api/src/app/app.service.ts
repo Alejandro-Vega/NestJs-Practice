@@ -17,10 +17,11 @@ export class AppService {
     });
   }
 
-  setDone(id: number, done: boolean): void {
+  setDone(id: number, done: boolean): Array<ITodo> {
     this.todos = this.todos.map((todo) => ({
       ...todo,
       done: todo.id === id ? done : todo.done,
     }));
+    return this.todos;
   }
 }

@@ -1,17 +1,25 @@
-import { useCallback, useRef } from 'react';
+import { ChangeEvent, useCallback, useState } from 'react';
 import { useTodos } from '@todo-app/data-access';
+import { Button, TextField } from '@mui/material';
+import { Stack } from '@mui/material';
+import { List } from '@mui/material';
+import { ListItem } from '@mui/material';
+import { FormGroup } from '@mui/material';
+import { FormControlLabel } from '@mui/material';
+import { Checkbox } from '@mui/material';
+import { Container } from '@mui/material';
 
 export function App() {
   const { todos, addTodo, toggleTodo } = useTodos();
-  const textInputRef = useRef<HTMLInputElement>(null);
+  const [todo, setTodo] = useState<string>('');
 
   const onAddTodo = useCallback(async () => {
-    if (!textInputRef.current) {
+    if (!todo) {
       return;
     }
-    await addTodo(textInputRef.current.value);
-    textInputRef.current.value = '';
-  }, [addTodo]);
+    await addTodo(todo);
+    setTodo('');
+  }, [addTodo, todo]);
 
   const onToggle = useCallback(
     async (id: number) => {
@@ -20,21 +28,38 @@ export function App() {
     [toggleTodo]
   );
 
+  const onTodoChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setTodo(e.target.value);
+  }, []);
+
   return (
-    <>
-      <div>
-        {todos?.map((todo) => (
-          <div key={todo.id}>
-            <input type="checkbox" onChange={() => onToggle(todo.id)} />
-            {todo.text}
-          </div>
-        ))}
-      </div>
-      <>
-        <input ref={textInputRef} />
-        <button onClick={onAddTodo}>Add</button>
-      </>
-    </>
+    <Container maxWidth="sm" sx={{ mt: 4 }}>
+      <Stack direction="column" spacing={2}>
+        <Stack direction="row" spacing={2}>
+          <TextField value={todo} onChange={onTodoChange} fullWidth />
+          <Button variant="contained" onClick={onAddTodo} sx={{ px: 5 }}>
+            Add
+          </Button>
+        </Stack>
+        <List>
+          {todos?.map((todo) => (
+            <ListItem key={todo.id} disablePadding>
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={todo.done}
+                      onChange={() => onToggle(todo.id)}
+                    />
+                  }
+                  label={todo.text}
+                />
+              </FormGroup>
+            </ListItem>
+          ))}
+        </List>
+      </Stack>
+    </Container>
   );
 }
 

@@ -28,10 +28,14 @@ export function useTodos() {
 
   const toggleTodo = useCallback(
     async (id: number) => {
-      await axios.post('http://localhost:3333/api/setDone', {
+      const res = await axios.post('http://localhost:3333/api/setDone', {
         id,
         done: !todos?.find((todo) => todo.id === id)?.done,
       });
+      if (!res?.data?.length) {
+        return;
+      }
+      setTodos(res.data);
     },
     [todos]
   );
